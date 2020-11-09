@@ -38,7 +38,6 @@ public class DefaultSqlSession implements SqlSession {
                 String className = method.getDeclaringClass().getName();
                 //组装statementId
                 String statementId = className + "." + methodName;
-                MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
                 //获取被调用方法的返回值类型
                 Type genericReturnType = method.getGenericReturnType();
                 //判断是否进行了泛型类型参数化

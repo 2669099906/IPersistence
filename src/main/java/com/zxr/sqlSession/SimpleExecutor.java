@@ -32,32 +32,36 @@ public class SimpleExecutor implements Executor {
         //3.获取预处理对象
         PreparedStatement preparedStatement = connection.prepareStatement(boundSql.getSqlText());
         //4.设置参数
-        //4.1获取参数类型
+        //4.1获取参数类型(参数的全类名)
         String paramType = mappedStatement.getParamType();
         Class<?> parameterTypeClass = getClassType(paramType);
         List<ParameterMapping> parameterMappingList = boundSql.getParameterMappingList();
+        //对preparedStatement的占位符进行赋值
         for (int i = 0; i < parameterMappingList.size(); i++) {
             ParameterMapping parameterMapping = parameterMappingList.get(i);
             String content = parameterMapping.getContent();
 
             //反射
             Field declaredField = parameterTypeClass.getDeclaredField(content);
-            //设置暴力访问
+            //设置暴力访问,防止私有变量无法赋值
             declaredField.setAccessible(true);
             //获取params第一个对象中的 [declaredField] 字段值
             Object o = declaredField.get(params[0]);
+            //preparedStatement占位符的序号不是从0开始，而是从1开始
             preparedStatement.setObject(i+1, o);
 
         }
-        //5.执行sql
+        //5.执行占位符赋值后的sql语句
         ResultSet resultSet = preparedStatement.executeQuery();
         //6.封装返回结果集
         String resultType = mappedStatement.getResultType();
         Class<?> resultTypeClass = getClassType(resultType);
         ArrayList<E> resultList = new ArrayList<>();
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        //遍历结果记录
         while (resultSet.next()){
-            ResultSetMetaData metaData = resultSet.getMetaData();
             Object o = resultTypeClass.getDeclaredConstructor().newInstance();
+            //循环set一条记录的所有字段
             for (int i = 1; i <= metaData.getColumnCount(); i++) {
                 //获取字段名
                 String columnName = metaData.getColumnName(i);
