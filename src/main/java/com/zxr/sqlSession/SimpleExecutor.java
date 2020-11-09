@@ -24,7 +24,7 @@ public class SimpleExecutor implements Executor {
                              MappedStatement mappedStatement,
                              Object... params) throws Exception {
         //1.注册驱动，获取连接
-        Connection connection = configuration.getDataSource().getConnection("root", "123456");
+        Connection connection = configuration.getDataSource().getConnection();
         //2.获取sql语句 select * from user where id = #{id} and username = #{username}
         //2.1转换sql语句 select * from user where id = ? and username = ? ,并对{}中的值进行存储
         String sql = mappedStatement.getSql();

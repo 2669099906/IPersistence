@@ -41,8 +41,8 @@ public class XMLConfiguration {
             String value = element.attributeValue("value");
             properties.setProperty(name, value);
         }
-        ComboPooledDataSource comboPooledDataSource = new ComboPooledDataSource("c3p0");
-        comboPooledDataSource.setUser(properties.getProperty("user"));
+        ComboPooledDataSource comboPooledDataSource = new ComboPooledDataSource();
+        comboPooledDataSource.setUser(properties.getProperty("username"));
         comboPooledDataSource.setPassword(properties.getProperty("password"));
         comboPooledDataSource.setDriverClass(properties.getProperty("driverClass"));
         comboPooledDataSource.setJdbcUrl(properties.getProperty("jdbcUrl"));
