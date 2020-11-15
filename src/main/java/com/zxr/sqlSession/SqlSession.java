@@ -16,4 +16,10 @@ public interface SqlSession {
     public <E> List<E> selectList(String statementId, Object... params) throws Exception;
     //根据条件查询单个
     public <E> E selectOne(String statementId, Object... params) throws Exception;
+    //更新接口
+    public Integer update(String statementId, Object... params) throws Exception;
+    //删除接口
+    public Integer delete(String statementId, Object... params) throws Exception;
+    //添加接口
+    public Integer insert(String statementId, Object... params) throws Exception;
 }

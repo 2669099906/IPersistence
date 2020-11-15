@@ -14,6 +14,8 @@ public class MappedStatement {
     private String parameterType;
     //sql语句
     private String sql;
+    //sql类型
+    private SqlType sqlType;
 
     public String getId() {
         return id;
@@ -33,6 +35,22 @@ public class MappedStatement {
 
     public String getParamType() {
         return parameterType;
+    }
+
+    public String getParameterType() {
+        return parameterType;
+    }
+
+    public void setParameterType(String parameterType) {
+        this.parameterType = parameterType;
+    }
+
+    public SqlType getSqlType() {
+        return sqlType;
+    }
+
+    public void setSqlType(SqlType sqlType) {
+        this.sqlType = sqlType;
     }
 
     public void setParamType(String paramType) {

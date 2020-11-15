@@ -19,10 +19,10 @@ import java.util.List;
  * @date 2020/11/8 23:08
  */
 public class SimpleExecutor implements Executor {
-    @Override
-    public <E> List<E> query(Configuration configuration,
-                             MappedStatement mappedStatement,
-                             Object... params) throws Exception {
+
+    private PreparedStatement prepareStatement(Configuration configuration,
+                                  MappedStatement mappedStatement,
+                                  Object... params) throws Exception {
         //1.注册驱动，获取连接
         Connection connection = configuration.getDataSource().getConnection();
         //2.获取sql语句 select * from user where id = #{id} and username = #{username}
@@ -49,8 +49,14 @@ public class SimpleExecutor implements Executor {
             Object o = declaredField.get(params[0]);
             //preparedStatement占位符的序号不是从0开始，而是从1开始
             preparedStatement.setObject(i+1, o);
-
         }
+        return preparedStatement;
+    }
+    @Override
+    public <E> List<E> query(Configuration configuration,
+                             MappedStatement mappedStatement,
+                             Object... params) throws Exception {
+        PreparedStatement preparedStatement = prepareStatement(configuration, mappedStatement, params);
         //5.执行占位符赋值后的sql语句
         ResultSet resultSet = preparedStatement.executeQuery();
         //6.封装返回结果集
@@ -75,6 +81,24 @@ public class SimpleExecutor implements Executor {
             resultList.add((E)o);
         }
         return resultList;
+    }
+
+    @Override
+    public int update(Configuration configuration, MappedStatement mappedStatement, Object... params) throws Exception {
+        PreparedStatement preparedStatement = prepareStatement(configuration, mappedStatement, params);
+        return preparedStatement.executeUpdate();
+    }
+
+    @Override
+    public int delete(Configuration configuration, MappedStatement mappedStatement, Object... params) throws Exception {
+        PreparedStatement preparedStatement = prepareStatement(configuration, mappedStatement, params);
+        return preparedStatement.executeUpdate();
+    }
+
+    @Override
+    public int insert(Configuration configuration, MappedStatement mappedStatement, Object... params) throws Exception {
+        PreparedStatement preparedStatement = prepareStatement(configuration, mappedStatement, params);
+        return preparedStatement.executeUpdate();
     }
 
     private Class<?> getClassType(String paramType) throws ClassNotFoundException {
