@@ -25,46 +25,44 @@ public class DefaultSqlSession implements SqlSession {
     @Override
     public <T> T getMapper(Class<?> mapperClass) {
         //动态代理dao提供的接口，调用proxy代理对象中的任何方法都是调用invoke方法
-        InvocationHandler invocationHandler = new InvocationHandler() {
-            @Override
-            /**
-             * proxy 当前代理对象的应用
-             * method 当前调用的方法的引用
-             * args 调用方法的入参
-             */
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                //底层都是执行JDBC。根据不同情况 调用selectList 或者 selectOne方法
-                //获取当前方法名
-                String methodName = method.getName();
-                //接口全限定名
-                String className = method.getDeclaringClass().getName();
-                //组装statementId
-                String statementId = className + "." + methodName;
-                //获取执行sql类型
-                MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
-                SqlType sqlType = mappedStatement.getSqlType();
-                //根据不同的sqlType执行不同的方法
-                switch (sqlType){
-                    case DELETE:
-                        return delete(statementId, args);
-                    case INSERT:
-                        return insert(statementId, args);
-                    case UPDATE:
-                        return update(statementId, args);
-                    case SELECT:
-                        //获取被调用方法的返回值类型
-                        Type genericReturnType = method.getGenericReturnType();
-                        //判断是否进行了泛型类型参数化
-                        if(genericReturnType instanceof ParameterizedType){
-                            return selectList(statementId, args);
-                        }
-                        return selectOne(statementId, args);
-                }
-                //程序执行到此处，证明sql类型有误
-                throw new Exception("sql类型不存在");
-            }
-        };
-        return (T)Proxy.newProxyInstance(mapperClass.getClassLoader(), new Class[]{mapperClass}, invocationHandler);
+        /**
+         * proxy 当前代理对象的应用
+         * method 当前调用的方法的引用
+         * args 调用方法的入参
+         */
+        InvocationHandler invocationHandler = (proxy, method, args) -> {
+             //底层都是执行JDBC。根据不同情况 调用selectList 或者 selectOne方法
+             //获取当前方法名
+             String methodName = method.getName();
+             //接口全限定名
+             String className = method.getDeclaringClass().getName();
+             //组装statementId
+             String statementId = className + "." + methodName;
+             //获取执行sql类型
+             MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
+             SqlType sqlType = mappedStatement.getSqlType();
+             //根据不同的sqlType执行不同的方法
+             switch (sqlType){
+                 case DELETE:
+                     return delete(statementId, args);
+                 case INSERT:
+                     return insert(statementId, args);
+                 case UPDATE:
+                     return update(statementId, args);
+                 case SELECT:
+                     //获取被调用方法的返回值类型
+                     Type genericReturnType = method.getGenericReturnType();
+                     //判断是否进行了泛型类型参数化
+                     if(genericReturnType instanceof ParameterizedType){
+                         return selectList(statementId, args);
+                     }
+                     return selectOne(statementId, args);
+             }
+             //程序执行到此处，证明sql类型有误
+             throw new Exception("sql类型不存在");
+         };
+        T t = (T)Proxy.newProxyInstance(mapperClass.getClassLoader(), new Class[]{mapperClass}, invocationHandler);
+        return t;
     }
 
     @Override
