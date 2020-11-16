@@ -7,6 +7,8 @@
 *.tar.gz
 *.rar
 
+/target
+
 # Compiled class file
 *.class
 
